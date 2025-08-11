@@ -1,0 +1,7 @@
+{
+  "name": "AI Music Supervisor",
+  "description": "Generate a professional music brief for a movie, campaign, or scene by providing a script or an image. This tool uses AI to analyze your input and suggest a musical direction, including mood, tempo, and instrumentation.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}

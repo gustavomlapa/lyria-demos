@@ -10,6 +10,7 @@ import { throttle } from '../utils/throttle';
 
 import './PromptController.ts';
 import './PlayPauseButton.ts';
+import './StopButton.ts';
 import type { PlaybackState, Prompt } from '../types';
 import { MidiDispatcher } from '../utils/MidiDispatcher';
 
@@ -233,7 +234,8 @@ export class PromptDjMidi extends LitElement {
         </select>
       </div>
       <div id="grid">${this.renderPrompts()}</div>
-      <play-pause-button-midi .playbackState=${this.playbackState} @click=${this.playPause}></play-pause-button-midi>`;
+      <play-pause-button-midi .playbackState=${this.playbackState} @click=${this.playPause}></play-pause-button-midi>
+      <stop-button-midi @click=${this.stop}></stop-button-midi>`;
   }
 
   private renderPrompts() {

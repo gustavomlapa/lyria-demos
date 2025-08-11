@@ -39,6 +39,10 @@ export function gen(parent: HTMLElement): PromptDjMidi {
     liveMusicHelper.playPause();
   });
 
+  pdjMidi.addEventListener('stop', () => {
+    liveMusicHelper.stop();
+  });
+
   liveMusicHelper.addEventListener('playback-state-changed', ((e: Event) => {
     const customEvent = e as CustomEvent<PlaybackState>;
     const playbackState = customEvent.detail;
