@@ -1,9 +1,6 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { MusicBrief } from "../types";
 
-
-
-console.log(process.env.API_KEY);
 const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
 const fileToGenerativePart = async (file: File) => {

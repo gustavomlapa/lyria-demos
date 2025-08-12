@@ -37,8 +37,8 @@ const App: React.FC = () => {
       case AppState.LOADING:
         return (
           <div className="flex flex-col items-center justify-center h-full animate-fade-in">
-            <div className="w-16 h-16 border-4 border-dashed rounded-full animate-spin border-brand-cyan"></div>
-            <p className="mt-4 text-lg text-slate-300">AI is analyzing your creative brief...</p>
+            <div className="w-16 h-16 border-4 border-dashed rounded-full animate-spin border-blue-600"></div>
+            <p className="mt-4 text-lg text-gray-600">AI is analyzing your creative brief...</p>
           </div>
         );
       case AppState.STUDIO:
@@ -49,12 +49,12 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-900 flex flex-col items-center p-4 sm:p-6 lg:p-8">
+    <div className="min-h-screen bg-white flex flex-col items-center p-4 sm:p-6 lg:p-8">
        <header className="w-full max-w-5xl mb-8 text-center">
-        <h1 className="text-4xl sm:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-brand-cyan to-brand-magenta">
+        <h1 className="text-4xl sm:text-5xl font-bold text-gray-900">
           AI Music Supervisor
         </h1>
-        <p className="mt-2 text-slate-400">Transform your vision into a musical masterpiece</p>
+        <p className="mt-2 text-gray-500">Transform your vision into a musical masterpiece</p>
       </header>
       <main className="w-full max-w-5xl flex-grow">
         {renderContent()}

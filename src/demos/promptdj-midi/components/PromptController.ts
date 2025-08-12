@@ -79,12 +79,12 @@ export class PromptControllerMidi extends LitElement {
       }
     }
     @media only screen and (max-width: 600px) {
-      #text {
-        font-size: 2.3vmin;
-      }
-      weight-knob {
-        width: 60%;
-      }
+    #text {
+      font-size: 1.6vmin;
+    }
+    #cc {
+      font-size: 1.3vmin;
+    }
     }
   `;
 

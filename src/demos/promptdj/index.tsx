@@ -48,21 +48,11 @@ function throttle(func: (...args: unknown[]) => void, delay: number) {
 
 const PROMPT_TEXT_PRESETS = [
   'Bossa Nova',
-  'Minimal Techno',
+  'Pisadinha',
   'Drum and Bass',
-  'Post Punk',
-  'Shoegaze',
   'Funk',
-  'Chiptune',
-  'Lush Strings',
-  'Sparkling Arpeggios',
-  'Staccato Rhythms',
-  'Punchy Kick',
-  'Dubstep',
   'K Pop',
-  'Neo Soul',
-  'Trip Hop',
-  'Thrash',
+  'Thrash Metal',
 ];
 
 const COLORS = [
@@ -215,6 +205,7 @@ class WeightSlider extends LitElement {
     const thumbStyle = styleMap({
       height: `${thumbHeightPercent}%`,
       backgroundColor: this.color,
+      boxShadow: `0 0 15px ${this.color}`,
       // Hide thumb if value is 0 or very close to prevent visual glitch
       display: this.value > 0.01 ? 'block' : 'none',
     });
@@ -389,7 +380,7 @@ export class PlayPauseButton extends IconButton {
     IconButton.styles,
     css`
       .loader {
-        stroke: #ffffff;
+        stroke: #2563eb;
         stroke-width: 3;
         stroke-linecap: round;
         animation: spin linear 1s infinite;
@@ -410,12 +401,12 @@ export class PlayPauseButton extends IconButton {
   private renderPause() {
     return svg`<path
       d="M75.0037 69V39H83.7537V69H75.0037ZM56.2537 69V39H65.0037V69H56.2537Z"
-      fill="#FEFEFE"
+      fill="#2563eb"
     />`;
   }
 
   private renderPlay() {
-    return svg`<path d="M60 71.5V36.5L87.5 54L60 71.5Z" fill="#FEFEFE" />`;
+    return svg`<path d="M60 71.5V36.5L87.5 54L60 71.5Z" fill="#2563eb" />`;
   }
 
   private renderLoading() {
@@ -437,7 +428,7 @@ export class PlayPauseButton extends IconButton {
 @customElement('reset-button')
 export class ResetButton extends IconButton {
   private renderResetIcon() {
-    return svg`<path fill="#fefefe" d="M71,77.1c-2.9,0-5.7-0.6-8.3-1.7s-4.8-2.6-6.7-4.5c-1.9-1.9-3.4-4.1-4.5-6.7c-1.1-2.6-1.7-5.3-1.7-8.3h4.7
+    return svg`<path fill="#2563eb" d="M71,77.1c-2.9,0-5.7-0.6-8.3-1.7s-4.8-2.6-6.7-4.5c-1.9-1.9-3.4-4.1-4.5-6.7c-1.1-2.6-1.7-5.3-1.7-8.3h4.7
       c0,4.6,1.6,8.5,4.8,11.7s7.1,4.8,11.7,4.8c4.6,0,8.5-1.6,11.7-4.8c3.2-3.2,4.8-7.1,4.8-11.7s-1.6-8.5-4.8-11.7
       c-3.2-3.2-7.1-4.8-11.7-4.8h-0.4l3.7,3.7L71,46.4L61.5,37l9.4-9.4l3.3,3.4l-3.7,3.7H71c2.9,0,5.7,0.6,8.3,1.7
       c2.6,1.1,4.8,2.6,6.7,4.5c1.9,1.9,3.4,4.1,4.5,6.7c1.1,2.6,1.7,5.3,1.7,8.3c0,2.9-0.6,5.7-1.7,8.3c-1.1,2.6-2.6,4.8-4.5,6.7
@@ -455,7 +446,7 @@ export class ResetButton extends IconButton {
 @customElement('add-prompt-button')
 export class AddPromptButton extends IconButton {
   private renderAddIcon() {
-    return svg`<path d="M67 40 H73 V52 H85 V58 H73 V70 H67 V58 H55 V52 H67 Z" fill="#FEFEFE" />`;
+    return svg`<path d="M67 40 H73 V52 H85 V58 H73 V70 H67 V58 H55 V52 H67 Z" fill="#2563eb" />`;
   }
 
   override renderIcon() {
@@ -1369,11 +1360,12 @@ export class PromptDj extends LitElement {
     prompts: {state: true},
     playbackState: {state: true},
     filteredPrompts: {state: true},
+    session: {attribute: false},
   };
 
   prompts: Map<string, Prompt>;
   private nextPromptId: number; // Monotonically increasing ID for new prompts
-  private session: LiveMusicSession;
+  session: LiveMusicSession | null = null;
   private readonly sampleRate = 48000;
   private audioContext = new (window.AudioContext || (window as any).webkitAudioContext)(
     {sampleRate: this.sampleRate},
@@ -1398,76 +1390,6 @@ export class PromptDj extends LitElement {
     this.outputNode.connect(this.audioContext.destination);
   }
 
-  override async firstUpdated() {
-    await this.connectToSession();
-    this.setSessionPrompts();
-  }
-
-  private async connectToSession() {
-    this.session = await ai.live.music.connect({
-      model: model,
-      callbacks: {
-        onmessage: async (e: LiveMusicServerMessage) => {
-          console.log('Received message from the server: %s\n');
-          console.log(e);
-          if (e.setupComplete) {
-            this.connectionError = false;
-          }
-          if (e.filteredPrompt) {
-            this.filteredPrompts = new Set([
-              ...this.filteredPrompts,
-              e.filteredPrompt.text,
-            ]);
-            this.toastMessage.show(e.filteredPrompt.filteredReason);
-          }
-          if (e.serverContent?.audioChunks !== undefined) {
-            if (
-              this.playbackState === 'paused' ||
-              this.playbackState === 'stopped'
-            )
-              return;
-            const audioBuffer = await decodeAudioData(
-              decode(e.serverContent?.audioChunks[0].data),
-              this.audioContext,
-              48000,
-              2,
-            );
-            const source = this.audioContext.createBufferSource();
-            source.buffer = audioBuffer;
-            source.connect(this.outputNode);
-            if (this.nextStartTime === 0) {
-              this.nextStartTime =
-                this.audioContext.currentTime + this.bufferTime;
-              setTimeout(() => {
-                this.playbackState = 'playing';
-              }, this.bufferTime * 1000);
-            }
-
-            if (this.nextStartTime < this.audioContext.currentTime) {
-              console.log('under run');
-              this.playbackState = 'loading';
-              this.nextStartTime = 0;
-              return;
-            }
-            source.start(this.nextStartTime);
-            this.nextStartTime += audioBuffer.duration;
-          }
-        },
-        onerror: (e: ErrorEvent) => {
-          console.log('Error occurred: %s\n', JSON.stringify(e));
-          this.connectionError = true;
-          this.stopAudio();
-          this.toastMessage.show('Connection error, please restart audio.');
-        },
-        onclose: (e: CloseEvent) => {
-          console.log('Connection closed.');
-          this.connectionError = true;
-          this.stopAudio();
-          this.toastMessage.show('Connection error, please restart audio.');
-        },
-      },
-    });
-  }
 
   private setSessionPrompts = throttle(async () => {
     const promptsToSend = Array.from(this.prompts.values()).filter((p) => {
@@ -1545,10 +1467,6 @@ export class PromptDj extends LitElement {
       this.playbackState === 'paused' ||
       this.playbackState === 'stopped'
     ) {
-      if (this.connectionError) {
-        await this.connectToSession();
-        this.setSessionPrompts();
-      }
       this.loadAudio();
     } else if (this.playbackState === 'loading') {
       this.stopAudio();
@@ -1676,10 +1594,6 @@ export class PromptDj extends LitElement {
   );
 
   private async handleReset() {
-    if (this.connectionError) {
-      await this.connectToSession();
-      this.setSessionPrompts();
-    }
     this.pauseAudio();
     this.session.resetContext();
     this.settingsController.resetToDefaults();
@@ -1718,7 +1632,6 @@ export class PromptDj extends LitElement {
         <play-pause-button
           @click=${this.handlePlayPause}
           .playbackState=${this.playbackState}></play-pause-button>
-        <reset-button @click=${this.handleReset}></reset-button>
       </div>
       <toast-message></toast-message>`;
   }

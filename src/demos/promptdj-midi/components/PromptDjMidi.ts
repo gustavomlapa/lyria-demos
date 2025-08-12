@@ -10,9 +10,11 @@ import { throttle } from '../utils/throttle';
 
 import './PromptController.ts';
 import './PlayPauseButton.ts';
-import './StopButton.ts';
 import type { PlaybackState, Prompt } from '../types';
 import { MidiDispatcher } from '../utils/MidiDispatcher';
+import { getInstrumentalStyles } from '../services/geminiService';
+import './InstrumentalPromptForm.ts';
+import { LiveMusicSession } from '@google/genai';
 
 /** The grid of prompt inputs. */
 @customElement('prompt-dj-midi')
@@ -22,10 +24,11 @@ export class PromptDjMidi extends LitElement {
       height: 100%;
       display: flex;
       flex-direction: column;
-      justify-content: center;
+      justify-content: space-around;
       align-items: center;
       box-sizing: border-box;
       position: relative;
+      padding: 2vmin 0;
     }
     #background {
       will-change: background-image;
@@ -36,19 +39,24 @@ export class PromptDjMidi extends LitElement {
       background: #111;
     }
     #grid {
-      width: 80vmin;
-      height: 80vmin;
+      width: 100%;
+      max-width: 800px;
+      aspect-ratio: 1;
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 2.5vmin;
-      margin-top: 8vmin;
+      gap: 3.5vmin;
+      padding: 2vmin;
+      box-sizing: border-box;
     }
     prompt-controller-midi {
-      width: 100%;
+      width: 14vmin;
+      height: 14vmin;
     }
     play-pause-button-midi {
-      position: relative;
-      width: 15vmin;
+      width: 10vmin;
+      height: 10vmin;
+      max-width: 70px;
+      max-height: 70px;
     }
     #buttons {
       position: absolute;
@@ -84,12 +92,26 @@ export class PromptDjMidi extends LitElement {
       outline: none;
       cursor: pointer;
     }
+    .prompt-input-container {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 2vmin;
+    }
+    .prompt-input-container input {
+      padding: 8px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+    }
   `;
 
   static override properties = {
     prompts: {state: true},
     showMidi: {type: Boolean},
+    appState: {state: true},
+    instrumentalPrompt: {state: true},
+    isLoadingStyles: {state: true},
     playbackState: {type: String},
+    session: {attribute: false},
     audioLevel: {state: true},
     midiInputIds: {state: true},
     activeMidiInputId: {state: true},
@@ -99,7 +121,11 @@ export class PromptDjMidi extends LitElement {
   prompts: Map<string, Prompt>;
   private midiDispatcher: MidiDispatcher;
   showMidi: boolean;
+  appState: 'input' | 'studio' = 'input';
+  instrumentalPrompt = '';
+  isLoadingStyles = false;
   playbackState: PlaybackState;
+  session: LiveMusicSession | null = null;
   audioLevel: number;
   midiInputIds: string[];
   activeMidiInputId: string | null;
@@ -185,9 +211,11 @@ export class PromptDjMidi extends LitElement {
       this.activeMidiInputId = this.midiDispatcher.activeMidiInputId;
     } catch (e) {
       this.showMidi = false;
-      this.dispatchEvent(new CustomEvent('error', {detail: e.message}));
+      const message = e instanceof Error ? e.message : 'An unknown error occurred.';
+      this.dispatchEvent(new CustomEvent('error', {detail: message}));
     }
   }
+
 
   private handleMidiInputChange(event: Event) {
     const selectElement = event.target as HTMLSelectElement;
@@ -200,6 +228,37 @@ export class PromptDjMidi extends LitElement {
     this.dispatchEvent(new CustomEvent('play-pause'));
   }
 
+  private async handleGenerate(e: CustomEvent<string>) {
+    const prompt = e.detail;
+    if (!prompt) return;
+    this.isLoadingStyles = true;
+    try {
+      const styles = await getInstrumentalStyles(prompt);
+      const newPrompts = new Map<string, Prompt>();
+      styles.forEach((style, i) => {
+        const promptId = `prompt-${i}`;
+        newPrompts.set(promptId, {
+          promptId,
+          text: style,
+          weight: 0,
+          cc: i + 1,
+          color: `#${Math.floor(Math.random()*16777215).toString(16)}`
+        });
+      });
+      this.prompts = newPrompts;
+      this.appState = 'studio';
+      this.requestUpdate();
+      this.dispatchEvent(
+        new CustomEvent('prompts-changed', { detail: this.prompts }),
+      );
+    } catch (error) {
+      console.error('Error getting instrumental styles:', error);
+      this.dispatchEvent(new CustomEvent('error', {detail: 'Error getting instrumental styles.'}));
+    } finally {
+      this.isLoadingStyles = false;
+    }
+  }
+
   public addFilteredPrompt(prompt: string) {
     this.filteredPrompts = new Set([...this.filteredPrompts, prompt]);
   }
@@ -209,6 +268,15 @@ export class PromptDjMidi extends LitElement {
   }
 
   override render() {
+    if (this.appState === 'input') {
+      return html`
+        <instrumental-prompt-form
+          .isLoading=${this.isLoadingStyles}
+          @generate=${this.handleGenerate}
+        ></instrumental-prompt-form>
+      `;
+    }
+
     const bg = styleMap({
       backgroundImage: this.makeBackground(),
     });
@@ -235,7 +303,7 @@ export class PromptDjMidi extends LitElement {
       </div>
       <div id="grid">${this.renderPrompts()}</div>
       <play-pause-button-midi .playbackState=${this.playbackState} @click=${this.playPause}></play-pause-button-midi>
-      <stop-button-midi @click=${this.stop}></stop-button-midi>`;
+    `;
   }
 
   private renderPrompts() {

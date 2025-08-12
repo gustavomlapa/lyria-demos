@@ -11,7 +11,7 @@ export class MidiDispatcher extends EventTarget {
 
   async getMidiAccess(): Promise<string[]> {
 
-    if (this.access) {
+    if (this.access && this.access.inputs) {
       return [...this.access.inputs.keys()];
     }
 
@@ -27,41 +27,43 @@ export class MidiDispatcher extends EventTarget {
       throw new Error('Unable to acquire MIDI access.');
     }
 
-    const inputIds = [...this.access.inputs.keys()];
+    const inputIds = this.access.inputs ? [...this.access.inputs.keys()] : [];
 
     if (inputIds.length > 0 && this.activeMidiInputId === null) {
       this.activeMidiInputId = inputIds[0];
     }
 
-    for (const input of this.access.inputs.values()) {
-      input.onmidimessage = (event: MIDIMessageEvent) => {
-        if (input.id !== this.activeMidiInputId) return;
+    if (this.access.inputs) {
+      for (const input of this.access.inputs.values()) {
+        input.onmidimessage = (event: MIDIMessageEvent) => {
+          if (input.id !== this.activeMidiInputId) return;
 
-        const { data } = event;
-        if (!data) {
-          console.error('MIDI message has no data');
-          return;
-        }
+          const { data } = event;
+          if (!data) {
+            console.error('MIDI message has no data');
+            return;
+          }
 
-        const statusByte = data[0];
-        const channel = statusByte & 0x0f;
-        const messageType = statusByte & 0xf0;
+          const statusByte = data[0];
+          const channel = statusByte & 0x0f;
+          const messageType = statusByte & 0xf0;
 
-        const isControlChange = messageType === 0xb0;
-        if (!isControlChange) return;
+          const isControlChange = messageType === 0xb0;
+          if (!isControlChange) return;
 
-        const detail: ControlChange = { cc: data[1], value: data[2], channel };
-        this.dispatchEvent(
-          new CustomEvent<ControlChange>('cc-message', { detail }),
-        );
-      };
+          const detail: ControlChange = { cc: data[1], value: data[2], channel };
+          this.dispatchEvent(
+            new CustomEvent<ControlChange>('cc-message', { detail }),
+          );
+        };
+      }
     }
 
     return inputIds;
   }
 
   getDeviceName(id: string): string | null {
-    if (!this.access) {
+    if (!this.access || !this.access.inputs) {
       return null;
     }
     const input = this.access.inputs.get(id);
@@ -69,7 +71,7 @@ export class MidiDispatcher extends EventTarget {
   }
 
   close() {
-    if (this.access) {
+    if (this.access && this.access.inputs) {
       for (const input of this.access.inputs.values()) {
         input.onmidimessage = null;
       }

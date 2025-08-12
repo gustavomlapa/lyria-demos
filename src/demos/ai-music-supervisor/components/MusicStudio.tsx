@@ -20,8 +20,8 @@ const generationSteps = [
 ];
 
 const StudioCard: React.FC<{ title: string; children: React.ReactNode }> = ({ title, children }) => (
-  <div className="bg-slate-800/50 rounded-lg p-4 backdrop-blur-sm border border-slate-700 animate-slide-up">
-    <h3 className="text-sm font-semibold text-brand-cyan mb-2 uppercase tracking-wider">{title}</h3>
+  <div className="bg-gray-50 rounded-lg p-4 border border-gray-200 animate-slide-up">
+    <h3 className="text-sm font-semibold text-blue-600 mb-2 uppercase tracking-wider">{title}</h3>
     {children}
   </div>
 );
@@ -234,30 +234,30 @@ const MusicStudio: React.FC<MusicStudioProps> = ({ brief, onBack }) => {
 
   return (
     <div className="w-full animate-fade-in">
-      <button onClick={handleBackWithCleanup} className="flex items-center gap-2 mb-6 text-slate-400 hover:text-brand-cyan transition-colors">
+      <button onClick={handleBackWithCleanup} className="flex items-center gap-2 mb-6 text-gray-500 hover:text-blue-600 transition-colors">
         <ArrowLeftIcon className="w-5 h-5" />
         Back to Editor
       </button>
 
       <div className="space-y-6">
         <header className="text-center">
-          <h2 className="text-3xl font-bold text-white">{brief.titleSuggestion}</h2>
-          <p className="text-slate-400 italic mt-1">"{brief.overallMood}"</p>
+          <h2 className="text-3xl font-bold text-gray-900">{brief.titleSuggestion}</h2>
+          <p className="text-gray-500 italic mt-1">"{brief.overallMood}"</p>
         </header>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           <StudioCard title="Key Elements">
             <div className="flex flex-wrap gap-2">
               {brief.keyElements.map((el, i) => (
-                <span key={i} className="bg-cyan-900/50 text-cyan-300 text-xs font-medium px-2.5 py-1 rounded-full">{el}</span>
+                <span key={i} className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-1 rounded-full">{el}</span>
               ))}
             </div>
           </StudioCard>
           <StudioCard title="Tempo">
-            <p className="text-2xl font-mono text-white">{brief.tempo}</p>
+            <p className="text-2xl font-mono text-gray-900">{brief.tempo}</p>
           </StudioCard>
            <StudioCard title="Negative Constraints">
-            <ul className="list-disc list-inside text-slate-300 text-sm space-y-1">
+            <ul className="list-disc list-inside text-gray-700 text-sm space-y-1">
                 {brief.negativeConstraints.map((c, i) => <li key={i}>{c}</li>)}
             </ul>
           </StudioCard>
@@ -267,7 +267,7 @@ const MusicStudio: React.FC<MusicStudioProps> = ({ brief, onBack }) => {
             <StudioCard title="Instrumentation">
               <div className="flex flex-wrap gap-2">
                 {brief.instrumentation.map((inst, i) => (
-                  <span key={i} className="bg-fuchsia-900/50 text-fuchsia-300 text-xs font-medium px-2.5 py-1 rounded-full">{inst}</span>
+                  <span key={i} className="bg-purple-100 text-purple-800 text-xs font-medium px-2.5 py-1 rounded-full">{inst}</span>
                 ))}
               </div>
             </StudioCard>
@@ -275,8 +275,8 @@ const MusicStudio: React.FC<MusicStudioProps> = ({ brief, onBack }) => {
                 <div className="space-y-3 text-sm">
                     {brief.musicalCues.map((cue, i) => (
                         <div key={i} className="flex gap-4">
-                            <span className="font-mono text-slate-400 flex-shrink-0 w-24">{cue.timestamp}</span>
-                            <p className="text-slate-300">{cue.description}</p>
+                            <span className="font-mono text-gray-500 flex-shrink-0 w-24">{cue.timestamp}</span>
+                            <p className="text-gray-700">{cue.description}</p>
                         </div>
                     ))}
                 </div>
@@ -284,36 +284,35 @@ const MusicStudio: React.FC<MusicStudioProps> = ({ brief, onBack }) => {
          </div>
 
         {/* Generation Section */}
-        <div className="mt-8 pt-6 border-t border-slate-700/50 text-center">
+        <div className="mt-8 pt-6 border-t border-gray-200 text-center">
           {isGenerating ? (
-             <div className="p-4 bg-slate-800 rounded-lg">
+             <div className="p-4 bg-gray-100 rounded-lg">
                 <div className="flex items-center justify-center gap-4">
-                    <div className="w-6 h-6 border-2 border-dashed rounded-full animate-spin border-brand-magenta"></div>
-                    <p className="text-lg text-slate-300">{generationSteps[generationProgress]}</p>
+                    <div className="w-6 h-6 border-2 border-dashed rounded-full animate-spin border-blue-600"></div>
+                    <p className="text-lg text-gray-600">{generationSteps[generationProgress]}</p>
                 </div>
              </div>
           ) : isGenerated ? (
-             <div className="p-4 bg-slate-800 rounded-lg animate-fade-in flex flex-col items-center">
-                <h3 className="text-xl font-bold text-green-400 mb-2">Track Generated!</h3>
-                 <p className="text-xs text-slate-500 mb-4">Music generated with Lyria technology (simulation)</p>
-                <div className="w-full max-w-md p-3 bg-slate-900 rounded-lg flex items-center gap-4">
-                    <button onClick={handlePlayToggle} className="p-2 bg-gradient-to-r from-brand-cyan to-brand-magenta rounded-full text-slate-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-900 focus:ring-brand-cyan">
+             <div className="p-4 bg-gray-100 rounded-lg animate-fade-in flex flex-col items-center">
+                <h3 className="text-xl font-bold text-green-600 mb-2">Track Generated!</h3>
+                 <p className="text-xs text-gray-500 mb-4">Music generated with Lyria technology (simulation)</p>
+                <div className="w-full max-w-md p-3 bg-white rounded-lg flex items-center gap-4 shadow">
+                    <button onClick={handlePlayToggle} className="p-2 bg-blue-600 rounded-full text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-white focus:ring-blue-500">
                         {isPlaying ? <StopIcon className="w-6 h-6"/> : <PlayIcon className="w-6 h-6"/>}
                     </button>
-                    <div className="flex-grow h-2 bg-slate-700 rounded-full overflow-hidden">
-                       <div className="h-full bg-gradient-to-r from-brand-cyan to-brand-magenta" style={{ width: `${progress * 100}%`}}></div>
+                    <div className="flex-grow h-2 bg-gray-200 rounded-full overflow-hidden">
+                       <div className="h-full bg-blue-600" style={{ width: `${progress * 100}%`}}></div>
                     </div>
-                    <span className="font-mono text-slate-400 w-24 text-center">
+                    <span className="font-mono text-gray-500 w-24 text-center">
                       {formatTime(progress * totalDurationRef.current)} / {formatTime(totalDurationRef.current)}
                     </span>
                 </div>
-                <button onClick={handleGenerateClick} className="mt-4 text-sm text-slate-400 hover:text-white">Regenerate</button>
-                <button onClick={stopMusic} className="mt-4 text-sm text-slate-400 hover:text-white">Stop</button>
+                <button onClick={handleGenerateClick} className="mt-4 text-sm text-blue-600 hover:text-blue-800">Regenerate</button>
              </div>
           ) : (
             <button
               onClick={handleGenerateClick}
-              className="group flex items-center justify-center gap-3 px-8 py-4 font-bold text-xl rounded-full text-slate-900 bg-gradient-to-r from-brand-cyan to-brand-magenta hover:scale-105 transform transition-transform duration-300"
+              className="group flex items-center justify-center gap-3 px-8 py-4 font-bold text-xl rounded-full text-white bg-blue-600 hover:scale-105 transform transition-transform duration-300"
             >
               <MusicNoteIcon className="w-6 h-6 transition-transform group-hover:rotate-12" />
               Generate with Lyria

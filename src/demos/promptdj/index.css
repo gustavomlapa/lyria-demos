@@ -4,6 +4,8 @@ html, body {
 }
 body {
   overflow: hidden;
+  background-color: #ffffff;
+  color: #000000;
 }
 body.dragging {
   cursor: grabbing;

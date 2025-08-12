@@ -78,7 +78,7 @@ export class WeightKnob extends LitElement {
   private handlePointerMove(e: PointerEvent) {
     const delta = this.dragStartPos - e.clientY;
     this.value = this.dragStartValue + delta * 0.01;
-    this.value = Math.max(0, Math.min(2, this.value));
+    this.value = Math.max(0, Math.min(1, this.value));
     this.dispatchEvent(new CustomEvent<number>('input', { detail: this.value }));
   }
 
@@ -91,7 +91,7 @@ export class WeightKnob extends LitElement {
   private handleWheel(e: WheelEvent) {
     const delta = e.deltaY;
     this.value = this.value + delta * -0.0025;
-    this.value = Math.max(0, Math.min(2, this.value));
+    this.value = Math.max(0, Math.min(1, this.value));
     this.dispatchEvent(new CustomEvent<number>('input', { detail: this.value }));
   }
 
@@ -119,12 +119,12 @@ export class WeightKnob extends LitElement {
     const rotationRange = Math.PI * 2 * 0.75;
     const minRot = -rotationRange / 2 - Math.PI / 2;
     const maxRot = rotationRange / 2 - Math.PI / 2;
-    const rot = minRot + (this.value / 2) * (maxRot - minRot);
+    const rot = minRot + this.value * (maxRot - minRot);
     const dotStyle = styleMap({
       transform: `translate(40px, 40px) rotate(${rot}rad)`,
     });
 
-    let scale = (this.value / 2) * (MAX_HALO_SCALE - MIN_HALO_SCALE);
+    let scale = this.value * (MAX_HALO_SCALE - MIN_HALO_SCALE);
     scale += MIN_HALO_SCALE;
     scale += this.audioLevel * HALO_LEVEL_MODIFIER;
 

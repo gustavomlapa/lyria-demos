@@ -39,7 +39,7 @@ export class PlayPauseButtonMidi extends LitElement {
       cursor: pointer;
     }
     .loader {
-      stroke: #ffffff;
+      stroke: #2563eb;
       stroke-width: 3;
       stroke-linecap: round;
       animation: spin linear 1s infinite;
@@ -156,12 +156,12 @@ export class PlayPauseButtonMidi extends LitElement {
   private renderPause() {
     return svg`<path
       d="M75.0037 69V39H83.7537V69H75.0037ZM56.2537 69V39H65.0037V69H56.2537Z"
-      fill="#FEFEFE"
+      fill="#2563eb"
     />`;
   }
 
   private renderPlay() {
-    return svg`<path d="M60 71.5V36.5L87.5 54L60 71.5Z" fill="#FEFEFE" />`;
+    return svg`<path d="M60 71.5V36.5L87.5 54L60 71.5Z" fill="#2563eb" />`;
   }
 
   private renderLoading() {
