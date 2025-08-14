@@ -1927,6 +1927,7 @@ export class PromptDj extends LitElement {
               <reset-button @click=${this.handleReset}></reset-button>
               <change-purpose-button
                 @click=${() => {
+                  this.pauseAudio();
                   this.isChangingPurpose = true;
                   this.showOnboarding = true;
                 }}></change-purpose-button>
