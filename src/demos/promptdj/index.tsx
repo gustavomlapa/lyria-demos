@@ -1541,7 +1541,7 @@ export class PromptDj extends LitElement {
     this.isGenerating = true;
     this.showOnboarding = false;
     try {
-      const prompt = `You are a creative music director. A user wants to create music for a specific purpose. Your task is to suggest 4 diverse and evocative musical prompts (styles, instruments, feelings, genres) that can be blended to achieve this purpose. The user's purpose is: '${purpose}'. Each prompt should be 1 to 3 words long and in English. Please provide only a JSON array of 4 strings in your response, where each string is a prompt.`;
+      const prompt = `You are a creative music director. A user wants to create music for a specific purpose. Your task is to suggest 4 diverse and evocative musical prompts (styles, instruments, feelings, genres) that can be blended to achieve this purpose, along with their initial weights. The user's purpose is: '${purpose}'. Each prompt should be 1 to 3 words long and in English. The weights should be a number between 0.0 and 2.0, representing the initial influence of the prompt. Please provide only a JSON array of 4 objects in your response, where each object has a "prompt" (string) and a "weight" (number).`;
       const response = await ai.models.generateContent({
         model: 'gemini-2.5-flash',
         contents: [{parts: [{text: prompt}]}],
@@ -1551,24 +1551,24 @@ export class PromptDj extends LitElement {
         .replace('```json', '')
         .replace('```', '')
         .trim();
-      const newPromptTexts = JSON.parse(textResponse) as string[];
+      const newPromptData = JSON.parse(textResponse) as {
+        prompt: string;
+        weight: number;
+      }[];
 
       const newPrompts: Prompt[] = [];
       const usedColors: string[] = [];
-      for (let i = 0; i < newPromptTexts.length; i++) {
-        const text = newPromptTexts[i];
+      for (let i = 0; i < newPromptData.length; i++) {
+        const {prompt: text, weight} = newPromptData[i];
         const color = getUnusedRandomColor(usedColors);
         usedColors.push(color);
         newPrompts.push({
           promptId: `prompt-${i}`,
           text,
-          weight: 0,
+          weight: weight,
           color,
         });
       }
-      // Activate the first two prompts
-      if (newPrompts[0]) newPrompts[0].weight = 1;
-      if (newPrompts[1]) newPrompts[1].weight = 1;
 
       this.prompts = new Map(newPrompts.map((p) => [p.promptId, p]));
       this.nextPromptId = this.prompts.size;
