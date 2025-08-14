@@ -1153,11 +1153,50 @@ class SettingsController extends LitElement {
   }
 }
 
+@customElement('loading-spinner')
+class LoadingSpinner extends LitElement {
+  static override styles = css`
+    .spinner-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1001;
+    }
+    .spinner {
+      width: 8vmin;
+      height: 8vmin;
+      border: 1vmin solid #fff;
+      border-top-color: #3aa60cff;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+  `;
+
+  override render() {
+    return html`
+      <div class="spinner-overlay">
+        <div class="spinner"></div>
+      </div>
+    `;
+  }
+}
+
 @customElement('onboarding-modal')
 class OnboardingModal extends LitElement {
   static override styles = css`
     .overlay {
-      position: fixed;
+      position: absolute;
       top: 0;
       left: 0;
       width: 100%;
@@ -1344,7 +1383,7 @@ class OnboardingModal extends LitElement {
                 class="skip-link"
                 @click=${this._handleSkip}
                 ?hidden=${this.isLoading}>
-                ${this.isUpdate ? 'Cancelar' : 'Pular e usar presets'}
+                ${'Cancelar'}
               </button>
             </div>
           </form>
@@ -1458,9 +1497,11 @@ export class PromptDj extends LitElement {
     onboardingIsLoading: {state: true},
     showOnboarding: {state: true},
     isChangingPurpose: {state: true},
+    isGenerating: {state: true},
   };
 
   prompts: Map<string, Prompt>;
+  isGenerating = false;
   private nextPromptId: number; // Monotonically increasing ID for new prompts
   private session: LiveMusicSession;
   private readonly sampleRate = 48000;
@@ -1497,9 +1538,10 @@ export class PromptDj extends LitElement {
   private async handleGenerateFromPurpose(e: CustomEvent<string>) {
     const purpose = e.detail;
     this.onboardingIsLoading = true;
+    this.isGenerating = true;
     this.showOnboarding = false;
     try {
-      const prompt = `You are a creative music director. A user wants to create music for a specific purpose. Your task is to suggest 4 diverse and evocative musical prompts (styles, instruments, feelings, genres) that can be blended to achieve this purpose. The user's purpose is: '${purpose}'. Each prompt should be 1 to 3 words long and in English. Please provide only a JSON array of 4 strings in your response, where each string is a prompt.`;
+      const prompt = `You are a creative music director. A user wants to create music for a specific purpose. Your task is to suggest 4 diverse and evocative musical prompts (styles, instruments, feelings, genres) that can be blended to achieve this purpose, along with their initial weights. The user's purpose is: '${purpose}'. Each prompt should be 1 to 3 words long and in English. The weights should be a number between 0.0 and 2.0, representing the initial influence of the prompt. Please provide only a JSON array of 4 objects in your response, where each object has a "prompt" (string) and a "weight" (number).`;
       const response = await ai.models.generateContent({
         model: 'gemini-2.5-flash',
         contents: [{parts: [{text: prompt}]}],
@@ -1509,29 +1551,28 @@ export class PromptDj extends LitElement {
         .replace('```json', '')
         .replace('```', '')
         .trim();
-      const newPromptTexts = JSON.parse(textResponse) as string[];
+      const newPromptData = JSON.parse(textResponse) as {
+        prompt: string;
+        weight: number;
+      }[];
 
       const newPrompts: Prompt[] = [];
       const usedColors: string[] = [];
-      for (let i = 0; i < newPromptTexts.length; i++) {
-        const text = newPromptTexts[i];
+      for (let i = 0; i < newPromptData.length; i++) {
+        const {prompt: text, weight} = newPromptData[i];
         const color = getUnusedRandomColor(usedColors);
         usedColors.push(color);
         newPrompts.push({
           promptId: `prompt-${i}`,
           text,
-          weight: 0,
+          weight: weight,
           color,
         });
       }
-      // Activate the first two prompts
-      if (newPrompts[0]) newPrompts[0].weight = 1;
-      if (newPrompts[1]) newPrompts[1].weight = 1;
 
       this.prompts = new Map(newPrompts.map((p) => [p.promptId, p]));
       this.nextPromptId = this.prompts.size;
       setStoredPrompts(this.prompts);
-      localStorage.setItem('promptdj-onboarding-seen', 'true');
 
       await this.connectToSession();
       this.setSessionPrompts();
@@ -1542,6 +1583,7 @@ export class PromptDj extends LitElement {
       );
     } finally {
       this.onboardingIsLoading = false;
+      this.isGenerating = false;
       this.isChangingPurpose = false; // Reset state
     }
   }
@@ -1549,9 +1591,7 @@ export class PromptDj extends LitElement {
   override async firstUpdated() {
     await this.connectToSession();
     this.setSessionPrompts();
-    if (this.prompts.size === 0) {
-      this.showOnboarding = true;
-    }
+    this.showOnboarding = true;
   }
 
   private async connectToSession() {
@@ -1853,32 +1893,46 @@ export class PromptDj extends LitElement {
       backgroundImage: this.makeBackground(),
     });
     return html`<div id="background" style=${bg}></div>
-      <div class="prompts-area">
-        <div
-          id="prompts-container"
-          @prompt-removed=${this.handlePromptRemoved}
-          @wheel=${this.handlePromptsContainerWheel}>
-          ${this.renderPrompts()}
-        </div>
-        <div class="add-prompt-button-container">
-          <add-prompt-button @click=${this.handleAddPrompt}></add-prompt-button>
-        </div>
-      </div>
-      <div id="settings-container">
-        <settings-controller
-          @settings-changed=${this.updateSettings}></settings-controller>
-      </div>
-      <div class="playback-container">
-        <play-pause-button
-          @click=${this.handlePlayPause}
-          .playbackState=${this.playbackState}></play-pause-button>
-        <reset-button @click=${this.handleReset}></reset-button>
-        <change-purpose-button
-          @click=${() => {
-            this.isChangingPurpose = true;
-            this.showOnboarding = true;
-          }}></change-purpose-button>
-      </div>
+      ${this.isGenerating
+        ? html`<loading-spinner></loading-spinner>`
+        : html`
+            <div class="prompts-area">
+              <div
+                id="prompts-container"
+                @prompt-removed=${this.handlePromptRemoved}
+                @wheel=${this.handlePromptsContainerWheel}>
+                ${this.renderPrompts()}
+              </div>
+              <div class="add-prompt-button-container">
+                <add-prompt-button
+                  @click=${this.handleAddPrompt}></add-prompt-button>
+              </div>
+            </div>
+          `}
+      ${this.isGenerating
+        ? ''
+        : html`
+            <div id="settings-container">
+              <settings-controller
+                @settings-changed=${this.updateSettings}></settings-controller>
+            </div>
+          `}
+      ${this.isGenerating
+        ? ''
+        : html`
+            <div class="playback-container">
+              <play-pause-button
+                @click=${this.handlePlayPause}
+                .playbackState=${this.playbackState}></play-pause-button>
+              <reset-button @click=${this.handleReset}></reset-button>
+              <change-purpose-button
+                @click=${() => {
+                  this.pauseAudio();
+                  this.isChangingPurpose = true;
+                  this.showOnboarding = true;
+                }}></change-purpose-button>
+            </div>
+          `}
       <toast-message></toast-message>
       <onboarding-modal
         .show=${this.showOnboarding}
@@ -1977,5 +2031,6 @@ declare global {
     'weight-slider': WeightSlider;
     'toast-message': ToastMessage;
     'onboarding-modal': OnboardingModal;
+    'loading-spinner': LoadingSpinner;
   }
 }
