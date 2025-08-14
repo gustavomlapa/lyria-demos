@@ -24,4 +24,7 @@
 
 ## 4. Known Issues
 
--   WebSocket connections were not being properly closed when switching between demo tabs. This has been addressed by ensuring the `close` event is dispatched correctly in the `PromptDjMidi` component and by improving the `close` method in the `PromptDj` and `VisionDj` components.
+-   The `promptdj` demo now presents the prompt asking at the beginning (on tab click) and not only after clicking on the prompt button.
+-   A loading indicator is now displayed after the user submits a prompt and before the sliders are updated.
+-   The "Temperature", "Guidance", and "Top K" controls are now hidden while the loading spinner is active.
+-   The play, restart, and back buttons are now hidden while the loading spinner is active.
