@@ -55,14 +55,14 @@ const App = () => {
             style={selectedDemo === 'promptdj-midi' ? activeLinkStyle : linkStyle}
           >
             <span style={{ marginRight: '15px', color: '#1967d2' }}>{'< >'}</span>
-            DJ-MIDI
+            Lyria DJ-MIDI
           </a>
           <a
             onClick={() => setSelectedDemo('promptdj')}
             style={selectedDemo === 'promptdj' ? activeLinkStyle : linkStyle}
           >
             <span style={{ marginRight: '15px', color: '#5f6368' }}>{'< >'}</span>
-            PromptDJ
+            PromptDJ with Gemini+Lyria
           </a>
           <a
             onClick={() => setSelectedDemo('visiondj')}
