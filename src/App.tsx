@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import PromptDjComponent from './demos/promptdj/PromptDjComponent';
 import PromptDjMidiComponent from './demos/promptdj-midi/PromptDjMidiComponent';
+import VisionDjComponent from './demos/visiondj/VisionDjComponent';
 
 const App = () => {
   const [selectedDemo, setSelectedDemo] = useState('promptdj-midi');
@@ -50,6 +51,13 @@ const App = () => {
         </div>
         <nav style={{ flex: 1 }}>
           <a
+            onClick={() => setSelectedDemo('promptdj-midi')}
+            style={selectedDemo === 'promptdj-midi' ? activeLinkStyle : linkStyle}
+          >
+            <span style={{ marginRight: '15px', color: '#1967d2' }}>{'< >'}</span>
+            DJ-MIDI
+          </a>
+          <a
             onClick={() => setSelectedDemo('promptdj')}
             style={selectedDemo === 'promptdj' ? activeLinkStyle : linkStyle}
           >
@@ -57,11 +65,11 @@ const App = () => {
             PromptDJ
           </a>
           <a
-            onClick={() => setSelectedDemo('promptdj-midi')}
-            style={selectedDemo === 'promptdj-midi' ? activeLinkStyle : linkStyle}
+            onClick={() => setSelectedDemo('visiondj')}
+            style={selectedDemo === 'visiondj' ? activeLinkStyle : linkStyle}
           >
             <span style={{ marginRight: '15px', color: '#1967d2' }}>{'< >'}</span>
-            PromptDJ-MIDI
+            VisionDJ
           </a>
         </nav>
         <div style={{ marginTop: 'auto', color: '#5f6368', fontSize: '12px' }}>
@@ -69,8 +77,9 @@ const App = () => {
         </div>
       </div>
       <div style={{ flex: 1, padding: '10px' }}>
-        {selectedDemo === 'promptdj' && <PromptDjComponent />}
         {selectedDemo === 'promptdj-midi' && <PromptDjMidiComponent />}
+        {selectedDemo === 'promptdj' && <PromptDjComponent />}
+        {selectedDemo === 'visiondj' && <VisionDjComponent />}
       </div>
     </div>
   );
