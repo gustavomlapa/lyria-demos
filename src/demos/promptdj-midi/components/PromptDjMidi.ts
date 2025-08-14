@@ -205,6 +205,7 @@ export class PromptDjMidi extends LitElement {
 
   public close() {
     this.midiDispatcher.close();
+    this.dispatchEvent(new CustomEvent('close'));
   }
 
   override render() {

@@ -2,11 +2,11 @@
 
 ## 1. Current Work Focus
 
-The main implementation phase is complete. The current focus is on ensuring the memory bank accurately reflects the finished work and documenting the project's state.
+The current focus is on fixing a bug related to WebSocket connections not being properly closed when switching between demo tabs.
 
 ## 2. Next Steps
 
-1.  **Verify Functionality:** Thoroughly test both demos within the merged application to ensure there are no regressions.
+1.  **Verify Functionality:** Thoroughly test the fix to ensure that WebSocket connections are now properly closed when switching between the `promptdj` and `promptdj-midi` demos.
 2.  **Code Cleanup:** Review the integrated code for any potential improvements or refactoring opportunities.
 3.  **Update Documentation:** Ensure all memory bank files are consistent and up-to-date with the final implementation.
 
