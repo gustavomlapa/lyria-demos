@@ -1196,7 +1196,7 @@ class LoadingSpinner extends LitElement {
 class OnboardingModal extends LitElement {
   static override styles = css`
     .overlay {
-      position: fixed;
+      position: absolute;
       top: 0;
       left: 0;
       width: 100%;
