@@ -1841,8 +1841,11 @@ export class PromptDj extends LitElement {
   }
 
   public close() {
+    if (this.session) {
+      this.pauseAudio();
+      this.session.close();
+    }
     this.stopAudio();
-    this.session?.close();
   }
 
   override render() {

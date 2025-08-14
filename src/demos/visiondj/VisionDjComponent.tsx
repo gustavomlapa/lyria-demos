@@ -11,7 +11,7 @@ const VisionDjComponent = () => {
       // Clear any previous content
       containerRef.current.innerHTML = '';
       // Generate the Lit component and store a reference to it
-      main(containerRef.current);
+      promptDjRef.current = main(containerRef.current);
     }
 
     // Cleanup function to be called on component unmount
