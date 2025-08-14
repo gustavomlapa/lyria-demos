@@ -2,7 +2,7 @@
 
 ## 1. Current Work Focus
 
-The current focus is on fixing a bug related to WebSocket connections not being properly closed when switching between demo tabs.
+The current focus is on fixing a bug related to WebSocket connections not being properly closed when switching between demo tabs. This now includes the new `visiondj` component.
 
 ## 2. Next Steps
 
@@ -14,4 +14,4 @@ The current focus is on fixing a bug related to WebSocket connections not being 
 
 -   **Project Structure:** The project has been successfully structured with the original demos located in the `src/demos` directory.
 -   **Dependency Management:** Dependencies have been consolidated into the root `package.json`.
--   **Component Model:** The demos are loaded via React wrapper components (`PromptDjComponent` and `PromptDjMidiComponent`), which dynamically inject the original Lit-based applications.
+-   **Component Model:** The demos are loaded via React wrapper components (`PromptDjComponent`, `PromptDjMidiComponent`, and `VisionDjComponent`), which dynamically inject the original Lit-based applications.

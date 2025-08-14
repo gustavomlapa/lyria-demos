@@ -223,6 +223,7 @@ class IconButton extends LitElement {
 export class PlayPauseButton extends IconButton {
   static override get properties() {
     return {
+      ...super.properties,
       playbackState: {type: String},
     };
   }
@@ -300,6 +301,7 @@ export class UploadContextButton extends IconButton {
 
   static override get properties() {
     return {
+      ...super.properties,
       loading: {type: Boolean},
     };
   }
@@ -1920,6 +1922,14 @@ export class PromptDj extends LitElement {
     this.mode = newMode;
   }
 
+  public close() {
+    if (this.session) {
+      this.pauseAudio();
+      this.session.close();
+    }
+    this.stopAudio();
+  }
+
   override render() {
     const isInitialDjMode = this.mode === 'dj' && this.prompts.length === 0;
 
@@ -2022,9 +2032,10 @@ export class PromptDj extends LitElement {
   }
 }
 
-export function main(container: HTMLElement) {
+export function main(container: HTMLElement): PromptDj {
   const pdj = new PromptDj();
   container.appendChild(pdj);
+  return pdj;
 }
 
 // main(document.body);

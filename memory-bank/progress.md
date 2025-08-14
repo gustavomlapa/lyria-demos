@@ -24,4 +24,4 @@
 
 ## 4. Known Issues
 
--   WebSocket connections were not being properly closed when switching between demo tabs. This has been addressed by ensuring the `close` event is dispatched correctly in the `PromptDjMidi` component and by improving the `close` method in the `PromptDj` component.
+-   WebSocket connections were not being properly closed when switching between demo tabs. This has been addressed by ensuring the `close` event is dispatched correctly in the `PromptDjMidi` component and by improving the `close` method in the `PromptDj` and `VisionDj` components.
