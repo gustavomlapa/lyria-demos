@@ -1844,9 +1844,14 @@ export class PromptDj extends LitElement {
               prompts: {
                 type: Type.ARRAY,
                 description:
-                  'A list of exactly 6 short, descriptive prompts for music generation.',
+                  'A list of exactly 6 short, descriptive prompts for music generation, each with a suggested weight.',
                 items: {
-                  type: Type.STRING,
+                  type: Type.OBJECT,
+                  properties: {
+                    prompt: {type: Type.STRING},
+                    weight: {type: Type.NUMBER},
+                  },
+                  required: ['prompt', 'weight'],
                 },
                 minItems: 6,
                 maxItems: 6,
@@ -1858,21 +1863,22 @@ export class PromptDj extends LitElement {
       });
 
       const jsonResponse = JSON.parse(response.text);
-      const newPromptTexts: string[] | undefined = jsonResponse.prompts;
+      const newPromptData: {prompt: string; weight: number}[] | undefined =
+        jsonResponse.prompts;
 
-      if (!newPromptTexts || newPromptTexts.length !== 6) {
+      if (!newPromptData || newPromptData.length !== 6) {
         this.toastMessage.show(
           'Could not generate 6 prompts from the file. Please try a different one.',
         );
       } else {
         const usedColors: string[] = [];
-        this.prompts = newPromptTexts.map((text, i) => {
+        this.prompts = newPromptData.map((data, i) => {
           const color = getUnusedRandomColor(usedColors);
           usedColors.push(color);
           return {
             promptId: `prompt-${i}`,
-            text: text,
-            weight: 0,
+            text: data.prompt,
+            weight: data.weight,
             color: color,
           };
         });
