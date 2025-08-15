@@ -43,6 +43,9 @@ export class LiveMusicHelper extends EventTarget {
     return this.sessionPromise;
   }
 
+  private retryCount = 0;
+  private maxRetries = 5;
+
   private async connect(): Promise<LiveMusicSession> {
     this.sessionPromise = this.ai.live.music.connect({
       model: this.model,
@@ -50,6 +53,8 @@ export class LiveMusicHelper extends EventTarget {
         onmessage: async (e: LiveMusicServerMessage) => {
           if (e.setupComplete) {
             this.connectionError = false;
+            // Connection successful, reset retry count.
+            this.retryCount = 0;
           }
           if (e.filteredPrompt) {
             this.filteredPrompts = new Set([...this.filteredPrompts, e.filteredPrompt.text!])
@@ -59,19 +64,41 @@ export class LiveMusicHelper extends EventTarget {
             await this.processAudioChunks(e.serverContent.audioChunks);
           }
         },
-        onerror: () => {
-          this.connectionError = true;
-          this.stop();
-          this.dispatchEvent(new CustomEvent('error', { detail: 'Connection error, please restart audio.' }));
+        onerror: (err) => {
+          console.error('LiveMusicSession error:', err);
+          this.handleReconnection();
         },
         onclose: () => {
-          this.connectionError = true;
-          this.stop();
-          this.dispatchEvent(new CustomEvent('error', { detail: 'Connection error, please restart audio.' }));
+          console.log('LiveMusicSession closed.');
+          this.handleReconnection();
         },
       },
     });
     return this.sessionPromise;
+  }
+
+  private handleReconnection() {
+    if (this.retryCount >= this.maxRetries) {
+      this.connectionError = true;
+      this.stop();
+      this.dispatchEvent(new CustomEvent('error', { detail: 'Connection error, please restart audio.' }));
+      // Reset for next manual attempt
+      this.retryCount = 0;
+      return;
+    }
+
+    this.retryCount++;
+    this.connectionError = true;
+    this.session = null;
+    this.sessionPromise = null;
+
+    const delay = 1000 * (2 ** this.retryCount); // Exponential backoff
+    console.log(`Connection lost. Reconnecting in ${delay}ms (attempt ${this.retryCount}/${this.maxRetries})...`);
+    this.dispatchEvent(new CustomEvent('reconnecting', { detail: `Reconnecting (attempt ${this.retryCount})...` }));
+
+    setTimeout(() => {
+      this.connect();
+    }, delay);
   }
 
   private setPlaybackState(state: PlaybackState) {
