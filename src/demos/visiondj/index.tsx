@@ -1448,7 +1448,7 @@ export class PromptDj extends LitElement {
       font-size: 1.8vmin;
       overflow: hidden;
       color: #eee;
-      font-family: 'Orbitron', sans-serif;
+      font-family: 'Roboto', sans-serif;
     }
     #background {
       position: absolute;
@@ -1512,19 +1512,16 @@ export class PromptDj extends LitElement {
       z-index: 1;
     }
     .initial-state h1 {
-      font-family: 'Orbitron', sans-serif;
+      font-family: 'Roboto', sans-serif;
       font-size: 7vmin;
       font-weight: 700;
       margin: 0;
       color: #fff;
       text-shadow:
-        0 0 5px #fff,
-        0 0 10px #fff,
-        0 0 15px #00ff1a,
-        0 0 20px #00ff1a;
+        0 0 10px #fff;
     }
     .initial-state p {
-      font-family: 'Orbitron', sans-serif;
+      font-family: 'Roboto', sans-serif;
       font-size: 2vmin;
       margin: 0;
       max-width: 50ch;
