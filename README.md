@@ -24,3 +24,32 @@ This demo extends the concept of Prompt DJ by allowing you to control the weight
 3.  **Run the development server:**
     ```bash
     npm run dev
+    ```
+
+## Deploy to Cloud Run
+
+You can also deploy this application to Google Cloud Run using the provided setup script.
+
+### Automated Setup and Deployment
+
+The `setup.sh` script automates the entire process, including:
+
+*   Configuring the correct Google Cloud project.
+*   Enabling the necessary APIs (Cloud Run, Artifact Registry, Cloud Build, Secret Manager).
+*   Creating an Artifact Registry repository if it doesn't exist.
+*   Creating a secret in Secret Manager for your Gemini API key if it doesn't exist.
+*   Granting the necessary IAM permissions to the Cloud Build service account.
+*   Submitting the build to Cloud Build, which deploys the application to Cloud Run.
+
+### How to Run the Script
+
+1.  **Make the script executable:**
+    ```bash
+    chmod +x setup.sh
+    ```
+2.  **Run the script:**
+    ```bash
+    ./setup.sh
+    ```
+
+The script will prompt you for your Gemini API key if it's not already configured in Secret Manager.

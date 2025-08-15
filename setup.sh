@@ -49,7 +49,7 @@ if ! gcloud secrets describe ${SECRET_NAME} --project=${PROJECT_ID} &> /dev/null
   # Cria o secret com o valor inserido pelo usuário
   printf "%s" "${API_KEY_VALUE}" | gcloud secrets create ${SECRET_NAME} \
     --replication-policy="automatic" \
-    --data-file=-
+    --data-file=- \
     --project=${PROJECT_ID} > /dev/null
   echo "-> Secret '${SECRET_NAME}' criado com sucesso."
 else
