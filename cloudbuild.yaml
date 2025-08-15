@@ -8,7 +8,6 @@ steps:
     - '-c'
     # The secret is now available as a standard environment variable
     - |
-      echo $$VITE_GEMINI_API_KEY_SECRET && \
       docker build --build-arg VITE_GEMINI_API_KEY=$$VITE_GEMINI_API_KEY_SECRET -t us-central1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/lyria-demos .
 
 # 2. Push the container image to Artifact Registry
